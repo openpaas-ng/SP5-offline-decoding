@@ -23,4 +23,7 @@ ln -s $PWD/tools/kaldi/egs/wsj/s5/steps scripts/
 ##### STT Model dir #####
 [ -d systems ] || mkdir -p systems
 ln -s $PATH_STT_Model systems/
+##### Create wavs & trans directory #####
+mkdir wavs
+mkdir trans
 echo "Sucess..."
