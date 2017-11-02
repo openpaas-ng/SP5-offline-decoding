@@ -1,8 +1,7 @@
 #!/bin/bash
 
-
-PATH_STT_Model=_your_Model_directory
-PATH_Kaldi=_your_kaldi_directory
+PATH_Kaldi=$1
+PATH_STT_Model=$2
 #PATH_Kaldi=/home/lingora/Documents/Linagora/kaldi
 
 ##### Speaker Diarization toolkit #######
@@ -22,7 +21,7 @@ ln -s $PWD/tools/kaldi/egs/wsj/s5/steps scripts/
 
 ##### STT Model dir #####
 [ -d systems ] || mkdir -p systems
-ln -s $PATH_STT_Model systems/
+ln -s $PATH_STT_Model $PWD/systems/
 ##### Create wavs & trans directory #####
 mkdir wavs
 mkdir trans
