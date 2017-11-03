@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-lvcsrRootDir=/home/lingora/Documents/Linagora/offline-decoding
+lvcsrRootDir=/data/PIPE_STT/offline-decoding
 export KALDI_ROOT=$lvcsrRootDir/tools/kaldi
 export PATH=$PWD/tools/festival/nsw/bin:$PWD/utils/:$KALDI_ROOT/tools/openfst/bin:$PWD:$PATH
 [ ! -f $KALDI_ROOT/tools/config/common_path.sh ] && echo >&2 "The standard file $KALDI_ROOT/tools/config/common_path.sh is not present -> Exit!" && exit 1
