@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-lvcsrRootDir=/data/PIPE_STT/offline-decoding
+#lvcsrRootDir=/media/storage0/ubuntu-abdel-data/PIPE_STT/offline-decoding
+lvcsrRootDir=/opt/speech-to-text
 export KALDI_ROOT=$lvcsrRootDir/tools/kaldi
 export PATH=$PWD/tools/festival/nsw/bin:$PWD/utils/:$KALDI_ROOT/tools/openfst/bin:$PWD:$PATH
 [ ! -f $KALDI_ROOT/tools/config/common_path.sh ] && echo >&2 "The standard file $KALDI_ROOT/tools/config/common_path.sh is not present -> Exit!" && exit 1
 . $KALDI_ROOT/tools/config/common_path.sh
-export LANG=fr_Fr.UTF-8
-export LANGUAGE=fr_FR.UTF-8
-export LC_ALL=fr_FR.UTF-8
+export LANG=C
+export LANGUAGE=C
+export LC_ALL=C
 
 # we use this both in the Data prepare (Normalization step) and in optional way in the LM training and the G2P-related scripts
 PYTHON='python2.7'
@@ -27,10 +28,3 @@ export PATH=$PATH:$SRILM_PATH
 # Sequitur G2P executable
 sequitur=$KALDI_ROOT/tools/sequitur/g2p.py
 sequitur_path="$(dirname $sequitur)/lib/$PYTHON/site-packages"
-
-# Directory under which the LM training corpus should be extracted
-LM_CORPUS_ROOT=./lm-corpus
-
-# Export SNR program
-#SNR_ROOT=/home/lingora/Documents/Linagora/snr_speech/snr/util/snr_calculator/current
-#export PATH=$PATH:$SNR_ROOT

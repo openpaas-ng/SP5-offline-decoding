@@ -10,18 +10,14 @@ nj=1
 decode_nj=1
 num_threads=1
 sysdir=$(readlink -f $1)
-echo $sysdir
 doScoring=0
 stage=1
 
 sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
-echo $sysRootName
 
 for file in $(find $wavdir -name "*.wav");do
-    echo $file
     fileRootName=$(basename $file .wav)
-    echo $fileRootName
-    datadir=$sysdir/kaldi_input_data/$fileRootName
+    datadir=$lvcsrRootDir/kaldi_input_data/$fileRootName
     [ -d $datadir ] || mkdir -p $datadir
     if [ $stage -le 0 ]; then
         if [ -e $wavdir/$fileRootName.stm ]; then
@@ -71,6 +67,7 @@ for file in $(find $wavdir -name "*.wav");do
             $lvcsrRootDir/scripts/steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd" --num-threads $num_threads --skip-scoring "true" \
             $gmmdir/Graph $datadir $transdir || exit 1
         fi
+	mv $transdir* $lvcsrRootDir/trans
 	fi
 	### for next sprint add
 	### fmllr Feature Extraction ####
