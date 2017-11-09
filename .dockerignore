@@ -1,0 +1,10 @@
+tools/
+trans/
+wavs/
+client/
+README.md
+start_docker.sh
+.git*
+scripts/steps
+scripts/utils
+systems/
