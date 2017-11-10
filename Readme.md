@@ -14,9 +14,9 @@ Using this project, you will be able to run an offline Automatic Speech Recognit
 
 Attention
 --------
-The ASR server that will be setup here require some kaldi model, In the docker image that I will detail below, there is no kaldi model included.
+The ASR server that will be setup here require kaldi model, In the docker image that I will detail below, there is no kaldi model included.
 
-You must have this model on your machine. You must also check that the model have this specific files :
+You must have this model on your machine. You must also check that the model have the specific files bellow :
 - final.alimdl
 - final.mat
 - final.mdl
@@ -31,52 +31,34 @@ You must have this model on your machine. You must also check that the model hav
 
 Install docker
 ---------
-Please, refer to [doc docker](https://docs.docker.com/engine/installation).
+Please, refer to [docker doc](https://docs.docker.com/engine/installation).
 
 Get the image
 ---------
-Currently, the image docker is about (4GB) and have debian8 OS, and not yet pulled on DockerHub.
+Currently, the image docker is about (4GB) and based on debian8, the image docker has not yet pulled on DockerHub.
 
 You need to build your own image:
-`docker build -t linagora/stt-offline .`
-
-
-Deploy Achritecture
-------------
-
-You need to specify both of your Kaldi and STT model directories:  
 ```
-./deploy-offline-decoding.sh <KALDI_PATH> <STT_Model_PATH>
-```
-the `deploy-offline-decoding.sh` script generate:
-- wavs directory: you need to put all wavs that you need to transcribe there
-- trans directory: you will find all transcripts there
-- scripts: contain all scripts for decoding
-- systems: will contain the STT Model and decoding directory for each wav
-```
-├── wavs
-├── trans
-├── deploy_offline_decoding.sh
-├── Readme.md
-├── scripts
-│   ├── cmd.sh
-│   ├── conf
-│   │   └── mfcc.conf
-│   ├── decode.sh
-│   ├── path.sh
-│   ├── steps -> <KALDI_PATH>/egs/wsj/s5/steps/
-│   └── utils -> <KALDI_PATH>/egs/wsj/s5/utils/
-├── systems
-│   └── SYS1=LEX001+LM001+AM001
-│       └── tri3 -> <STT_Model_PATH>
-└── tools
-    ├── kaldi -> <KALDI_PATH>
-    └── LIUM_SpkDiarization-8.4.1.jar
+docker build -t linagora/stt-offline .
 ```
 
 How to use
 ----------
+`start_docker.sh` allow to build and create the container assuming that your kaldi model is located at `<Path_model>`
+```
+./start_docker.sh <Path_model> <Port>
+```
+The `<Port>` param publish a container's port to the host, you should use POST method to send wav file to the server for transcription.
 
 Run Example
 ----------
-to be described
+Simple call using curl:
+```
+curl -F "wav_file=@<wav_path>" http://<IP:PORT_service>/upload > <output_trans>
+```
+The attribut `wav_file` is needed to submit the wav file to the server using POST Method
+
+Client script is available and allow to connect to the server located at `http://localhost:<Port>/upload`
+```
+./client/client <wav_path> <IP_server>:<POST> <Output>
+```
