@@ -29,8 +29,7 @@ RUN cd /opt && wget http://www-lium.univ-lemans.fr/diarization/lib/exe/fetch.php
     gzip -d lium_spkdiarization-8.4.1.jar.gz
 
 # Build kaldi
-RUN cd /opt && \
-    git https://ci.linagora.com/aheba/kaldi_2015 && \
+RUN git clone https://ci.linagora.com/aheba/kaldi_2015 /opt/kaldi && \
     cd /opt/kaldi/tools && \
     make && \
     cd /opt/kaldi/src && ./configure --shared && make depend && make
