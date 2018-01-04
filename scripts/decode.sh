@@ -12,11 +12,12 @@ num_threads=1
 sysdir=$(readlink -f $1)
 doScoring=0
 stage=1
-
+curentFile=$2
+file="$wavdir/$curentFile"
 sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 
-for file in $(find $wavdir -name "*.wav");do
     fileRootName=$(basename $file .wav)
+
     datadir=$lvcsrRootDir/kaldi_input_data/$fileRootName
     [ -d $datadir ] || mkdir -p $datadir
     if [ $stage -le 0 ]; then
@@ -67,14 +68,14 @@ for file in $(find $wavdir -name "*.wav");do
             $lvcsrRootDir/scripts/steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd" --num-threads $num_threads --skip-scoring "true" \
             $gmmdir/Graph $datadir $transdir || exit 1
         fi
-	mv $transdir* $lvcsrRootDir/trans
+	mv $transdir $lvcsrRootDir/trans
+	cat $lvcsrRootDir/trans/decode_$fileRootName/log/decode.1.log | grep -v "#" | grep -v "LOG" | grep -v "gmm-latgen-faster" | grep -v "splice-feats" | grep -v "transform-feats" | grep -v "apply-cmvn" | awk '{$1=""; print $0}' | sed 's/^[ ]//' > $lvcsrRootDir/trans/decode_$fileRootName.log
 	fi
 	### for next sprint add
 	### fmllr Feature Extraction ####
 	### DNN Acoustic Models applied on top of the fmllr features ###
 	### Rescoring with LM
 	### Get CTM and STM files
-done
 
 echo "End...."
 
