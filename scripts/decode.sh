@@ -37,7 +37,8 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
         # Generate kaldi input for offline decoding
         # file gen: segments, utt2spk, spk2utt, wav.scp
         # Gen segments file
-        awk '$1 !~ /^;;/ {print $1"-"$8"-"$3/100.0"-"($3+$4)/100.0" "$1" "$3/100.0" "($3+$4)/100.0}' \
+	#awk '$1 !~ /^;;/ {print $1"-"$8"-"$3/100.0"-"($3+$4)/100.0" "$1" "$3/100.0" "($3+$4)/100.0}'
+        awk '$1 !~ /^;;/ {print $1"-"$8"-"$3"-"($3+$4)" "$1" "$3" "($3+$4)}' \
 		   	$datadir/$fileRootName.seg | sort -nk3 > $datadir/segments
         # Gen utt2spk file
         awk '{split($1,a,"-"); print $1" "a[2]  }'  $datadir/segments > $datadir/utt2spk
