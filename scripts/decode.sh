@@ -27,9 +27,11 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
         fi
     fi
     if [ $stage -le 1 ]; then
-        echo "doing Speaker diaritization : segment extraction"
-        java -Xmx2024m -jar $lvcsrRootDir/tools/lium_spkdiarization-8.4.1.jar  \
-            --fInputMask=$file --sOutputMask=$datadir/$fileRootName.seg --doCEClustering $fileRootName
+#        echo "doing Speaker diaritization : segment extraction"
+#        java -Xmx2024m -jar $lvcsrRootDir/tools/lium_spkdiarization-8.4.1.jar  \
+#            --fInputMask=$file --sOutputMask=$datadir/$fileRootName.seg --doCEClustering $fileRootName
+	duration=`soxi -D $file`
+	echo "$fileRootName 1 0 $duration M S U S0" | sort -nk3 > $datadir/$fileRootName.seg
     fi
     if [ $stage -le 2 ]; then
         # Generate kaldi input for offline decoding
