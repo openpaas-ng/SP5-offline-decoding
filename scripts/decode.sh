@@ -37,7 +37,8 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
         # Generate kaldi input for offline decoding
         # file gen: segments, utt2spk, spk2utt, wav.scp
         # Gen segments file
-        awk '$1 !~ /^;;/ {print $1"-"$8"-"$3/100.0"-"($3+$4)/100.0" "$1" "$3/100.0" "($3+$4)/100.0}' \
+	#awk '$1 !~ /^;;/ {print $1"-"$8"-"$3/100.0"-"($3+$4)/100.0" "$1" "$3/100.0" "($3+$4)/100.0}'
+        awk '$1 !~ /^;;/ {print $1"-"$8"-"$3"-"($3+$4)" "$1" "$3" "($3+$4)}' \
 		   	$datadir/$fileRootName.seg | sort -nk3 > $datadir/segments
         # Gen utt2spk file
         awk '{split($1,a,"-"); print $1" "a[2]  }'  $datadir/segments > $datadir/utt2spk
@@ -67,7 +68,7 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 	if [ $stage -le 4 ]; then
         if [ ! -f $transdir/trans.1 ]; then
             echo "run fmllr decoding"
-            $lvcsrRootDir/scripts/steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd" --num-threads $num_threads --skip-scoring "true" \
+            $lvcsrRootDir/scripts/steps/decode.sh --nj $decode_nj --cmd "$decode_cmd" --num-threads $num_threads --skip-scoring "true" \
             $gmmdir/Graph $datadir $transdir || exit 1
         fi
 	mv $transdir $lvcsrRootDir/trans
