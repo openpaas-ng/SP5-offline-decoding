@@ -49,5 +49,4 @@ COPY . .
 RUN ./deploy-offline-decoding.sh /opt/kaldi /opt/lium_spkdiarization-8.4.1.jar /opt/models
 
 # Set the default command
-EXPOSE 4000
-CMD ./LinSTT_webservice.py
+CMD ./worker.py
