@@ -53,13 +53,14 @@ class WorkerWebSocket(WebSocketClient):
                 # TODO: preprocessing ? (sox python)
                 if PREPROCESSING:
                     pass
-                # Offline decode call
+                # Offline decoder call
+                logging.debug(os.listdir('./wavs'))
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
-                subprocess.call(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav', shell=True)
-                # TODO: nettoyer les fichiers temporaires
+                subprocess.call("cd scripts; ./decode.sh ../systems/models "+self.fileName+".wav", shell=True)
                 
-                # TODO: renvoyer la transcription au master
-                logging.debug(os.listdir('.'))
+                # Delete temporary files
+                
+                # Check 
                 if os.path.isfile('trans/decode_'+self.fileName+'.log'):
                     with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
                         result = resultFile.read()

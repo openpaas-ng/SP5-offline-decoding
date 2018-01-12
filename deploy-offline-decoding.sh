@@ -27,4 +27,4 @@ ln -s $PATH_STT_Models $PWD/systems/
 ##### Create wavs & trans directory #####
 mkdir wavs
 mkdir trans
-echo "Sucess..."
+echo "Success..."
