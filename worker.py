@@ -12,6 +12,7 @@ import logging
 import json
 import subprocess
 import configparser
+import re
 
 from ws4py.client.threadedclient import WebSocketClient
 
@@ -29,7 +30,7 @@ PREPROCESSING = True if worker_settings.get('worker_params', 'preprocessing') ==
 class WorkerWebSocket(WebSocketClient):
     def __init__(self, uri):
         WebSocketClient.__init__(self, url=uri, heartbeat_freq=10)
-        self.request_id = "<undefined>"
+
     def opened(self):
         pass
     def guard_timeout(self):
@@ -42,19 +43,23 @@ class WorkerWebSocket(WebSocketClient):
         else: 
 
             if 'uuid' in json_msg.keys(): #Receive the file path to process
-                self.fileName = json_msg['uuid']
+                self.client_uuid = json_msg['uuid']
+                self.fileName = self.client_uuid.replace('-', '')
                 self.file = json_msg['file'].decode('base64')
+
                 with open(TEMP_FILE_PATH+self.fileName+'.wav', 'wb') as f:
                     f.write(self.file)
-                logging.debug("FileName received: %s" % json_msg['uuid'])
+                logging.debug("FileName received: %s" % self.fileName)
                 # TODO: preprocessing ? (sox python)
                 if PREPROCESSING:
                     pass
-                # TODO: appeler le offline decoder
-                subprocess.call(DECODER_COMMAND + self.fileName+'.wav', shell=True)
+                # Offline decode call
+                logging.debug(DECODER_COMMAND + ' ' + self.fileName+'.wav')
+                subprocess.call(DECODER_COMMAND + ' ' + self.fileName+'.wav', shell=True)
                 # TODO: nettoyer les fichiers temporaires
                 
                 # TODO: renvoyer la transcription au master
+                logging.debug(os.listdir('./trans'))
                 with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
                     result = resultFile.read()
                 self.send_result(result)
@@ -63,7 +68,9 @@ class WorkerWebSocket(WebSocketClient):
         logging.debug('POST received')
 
     def send_result(self, result=None):
-        msg = json.dumps({u'uuid': self.fileName, u'transcription':result, u'trust_ind':u"0.1235"})
+        msg = json.dumps({u'uuid': self.client_uuid, u'transcription':result, u'trust_ind':u"0.1235"})
+        self.client_uuid = None
+        # TODO cleanup temp files.
         self.send(msg)
 
     def closed(self, code, reason=None): 
