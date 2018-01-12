@@ -1,7 +1,7 @@
 #!/bin/bash
 
-. cmd.sh
-. path.sh
+. ./scripts/cmd.sh
+. ./scripts/path.sh
 
 # call sh ./decoding.sh ../systems/sys1
 

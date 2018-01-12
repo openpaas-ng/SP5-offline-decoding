@@ -47,22 +47,26 @@ class WorkerWebSocket(WebSocketClient):
                 self.fileName = self.client_uuid.replace('-', '')
                 self.file = json_msg['file'].decode('base64')
 
-                with open(TEMP_FILE_PATH+self.fileName+'.wav', 'wb') as f:
+                with open('./wavs/'+self.fileName+'.wav', 'wb') as f:
                     f.write(self.file)
                 logging.debug("FileName received: %s" % self.fileName)
                 # TODO: preprocessing ? (sox python)
                 if PREPROCESSING:
                     pass
                 # Offline decode call
-                logging.debug(DECODER_COMMAND + ' ' + self.fileName+'.wav')
-                subprocess.call(DECODER_COMMAND + ' ' + self.fileName+'.wav', shell=True)
+                logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
+                subprocess.call(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav', shell=True)
                 # TODO: nettoyer les fichiers temporaires
                 
                 # TODO: renvoyer la transcription au master
                 logging.debug(os.listdir('.'))
-                with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
-                    result = resultFile.read()
-                self.send_result(result)
+                if os.path.isfile('trans/decode_'+self.fileName+'.log'):
+                    with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
+                        result = resultFile.read()
+                        self.send_result(result)
+                else:
+                    logging.error("Worker Failed to create transcription file")
+                    self.send_error("File was not created by worker")
 
     def post(self, m):
         logging.debug('POST received')
@@ -71,6 +75,9 @@ class WorkerWebSocket(WebSocketClient):
         msg = json.dumps({u'uuid': self.client_uuid, u'transcription':result, u'trust_ind':u"0.1235"})
         self.client_uuid = None
         # TODO cleanup temp files.
+        self.send(msg)
+    def send_error(self, message):
+        msg = json.dumps({u'uuid': self.client_uuid, u'error':message})
         self.send(msg)
 
     def closed(self, code, reason=None): 
