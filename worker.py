@@ -59,7 +59,7 @@ class WorkerWebSocket(WebSocketClient):
                 # TODO: nettoyer les fichiers temporaires
                 
                 # TODO: renvoyer la transcription au master
-                logging.debug(os.listdir('./trans'))
+                logging.debug(os.listdir('.'))
                 with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
                     result = resultFile.read()
                 self.send_result(result)
