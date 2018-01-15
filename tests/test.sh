@@ -1,4 +1,9 @@
-#/bin/bash
-cd $PWD
-./module/server/master_server.py
-./modules/worker_offline/start_worker.sh
+#!/bin/sh
+
+i=0
+while [ "$i" -lt 100 ]
+do    
+    curl -F "wavFile=@mocanu-Samy.wav" http://localhost:8888/client/post/speech &
+    echo $i
+    i=`expr $i + 1`
+done

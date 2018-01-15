@@ -79,7 +79,6 @@ class MainHandler(tornado.web.RequestHandler):
 class DecodeRequestHandler(tornado.web.RequestHandler):
     SUPPORTED_METHOD = ('POST')
     #Called at the beginning of a request before get/post/etc
-    #Request A worker. 
     def prepare(self):
         self.worker = None
         self.filePath = None
@@ -141,6 +140,7 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
     def receive_response(self, message):
         logging.debug("Forwarding transcription to client")
         self.write({'transcript': message})
+        os.remove(TEMP_FILE_PATH+self.uuid+'.wav')
         self.set_status(200, "Transcription succeded")
         self.application.num_requests_processed += 1
         self.waitResponse.notify()
