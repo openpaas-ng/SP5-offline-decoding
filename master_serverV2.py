@@ -85,11 +85,11 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
             self.finish()
         #File Retrieval
         # TODO: Adapt input to existing controller API
-        if 'file_to_transcript' not in  self.request.files.keys():
+        if 'wavFile' not in  self.request.files.keys():
             self.set_status(403, "POST request must contain a 'file_to_transcript' field.")
             self.finish()
             logging.debug("POST request from %s does not contain 'file_to_transcript' field.")
-        temp_file = self.request.files['file_to_transcript'][0]['body']
+        temp_file = self.request.files['wavFile'][0]['body']
         self.temp_file = temp_file
         
         #Writing file
