@@ -25,6 +25,7 @@ server_settings.read('server.cfg')
 SERVER_PORT = server_settings.get('server_params', 'listening_port')
 TEMP_FILE_PATH = server_settings.get('machine_params', 'temp_file_location')
 KEEP_TEMP_FILE = True if server_settings.get('server_params', 'keep_temp_files') == 'true' else False
+LOGGING_LEVEL = logging.DEBUG if server_settings.get('server_params', 'debug') == 'true' else logging.INFO
 
 
 class Application(tornado.web.Application):
@@ -40,6 +41,7 @@ class Application(tornado.web.Application):
         handlers = [
             (r"/", MainHandler),
             (r"/client/post/speech", DecodeRequestHandler),
+            (r"/upload", DecodeRequestHandler),
             (r"/worker/ws/speech", WorkerWebSocketHandler)
         ]
         tornado.web.Application.__init__(self, handlers, **settings)
@@ -47,6 +49,7 @@ class Application(tornado.web.Application):
         self.waiting_client = set()
         self.num_requests_processed = 0
 
+    #TODO: Abort request when the client is waiting for a determined amount of time
     def check_waiting_clients(self):
         if len(self.waiting_client) > 0:
             try:
@@ -56,6 +59,11 @@ class Application(tornado.web.Application):
             else:
                  client.waitWorker.notify() 
 
+    def display_server_status(self):
+        logging.info('#'*50)
+        logging.info("Available workers: %s" % str(len(self.available_workers)))
+        logging.info("Waiting clients: %s" % str(len(self.waiting_client)))
+        logging.info("Requests processed: %s" % str(self.num_requests_processed))
             
 
 # Return le README
@@ -120,12 +128,12 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
             except:
                 self.worker = None
                 self.application.waiting_client.add(self)
-                logging.debug("Awaiting client: %s" % str(len(self.application.waiting_client)))
+                self.application.display_server_status()
                 yield self.waitWorker.wait()
             else:
                 self.worker.client_handler = self
                 logging.debug("Worker allocated to client %s" % self.uuid)
-                logging.debug("Available workers: " + str(len(self.application.available_workers)))
+                self.application.display_server_status()
 
 
           
@@ -134,6 +142,7 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
         logging.debug("Forwarding transcription to client")
         self.add_header('result', message)
         self.set_status(200, "Transcription succeded")
+        self.application.num_requests_processed += 1
         self.waitResponse.notify()
         
 
@@ -151,7 +160,7 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.application.available_workers.add(self)
         self.application.check_waiting_clients()
         logging.debug("Worker connected")
-        logging.debug("Available workers: " + str(len(self.application.available_workers)))
+        self.application.display_server_status()
         
     def on_message(self, message):
         try:
@@ -164,7 +173,7 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.client_handler.receive_response(json.dumps({'transcript':json_msg['transcription']}))
                 self.client_handler = None
                 self.application.available_workers.add(self)
-                logging.debug("WORKER Available workers: " + str(len(self.application.available_workers)))
+                self.application.display_server_status()
                 self.application.check_waiting_clients()
                 
             elif 'error' in json_msg.keys():
@@ -177,11 +186,11 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.client_handler.send_error("Worker closed")
         logging.debug("WORKER WebSocket closed")
         self.application.available_workers.discard(self)
-        logging.debug("WORKER Available workers: " + str(len(self.application.available_workers)))
+        self.application.display_server_status()
 
 def main():
     
-    logging.basicConfig(level=logging.DEBUG, format="%(levelname)8s %(asctime)s %(message)s ")
+    logging.basicConfig(level=LOGGING_LEVEL, format="%(levelname)8s %(asctime)s %(message)s ")
     #Check if the temp_file repository exist
     if not os.path.isdir(TEMP_FILE_PATH):
         os.mkdir(TEMP_FILE_PATH)

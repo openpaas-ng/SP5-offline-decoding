@@ -41,8 +41,7 @@ class WorkerWebSocket(WebSocketClient):
         except:
             logging.debug("Message received: %s" % str(m))
         else: 
-
-            if 'uuid' in json_msg.keys(): #Receive the file path to process
+            if 'uuid' in json_msg.keys():
                 self.client_uuid = json_msg['uuid']
                 self.fileName = self.client_uuid.replace('-', '')
                 self.file = json_msg['file'].decode('base64')
@@ -54,20 +53,23 @@ class WorkerWebSocket(WebSocketClient):
                 if PREPROCESSING:
                     pass
                 # Offline decoder call
-                logging.debug(os.listdir('./wavs'))
+                
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
                 subprocess.call("cd scripts; ./decode.sh ../systems/models "+self.fileName+".wav", shell=True)
                 
-                # Delete temporary files
-                
-                # Check 
+                # Check result
                 if os.path.isfile('trans/decode_'+self.fileName+'.log'):
                     with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
                         result = resultFile.read()
+                        logging.debug("Transcription is: %s" % result)
                         self.send_result(result)
                 else:
                     logging.error("Worker Failed to create transcription file")
                     self.send_error("File was not created by worker")
+                
+                # Delete temporary files
+                for file in os.listdir(TEMP_FILE_PATH):
+                    os.remove(TEMP_FILE_PATH+file)
 
     def post(self, m):
         logging.debug('POST received')
@@ -75,8 +77,8 @@ class WorkerWebSocket(WebSocketClient):
     def send_result(self, result=None):
         msg = json.dumps({u'uuid': self.client_uuid, u'transcription':result, u'trust_ind':u"0.1235"})
         self.client_uuid = None
-        # TODO cleanup temp files.
         self.send(msg)
+
     def send_error(self, message):
         msg = json.dumps({u'uuid': self.client_uuid, u'error':message})
         self.send(msg)
@@ -91,19 +93,18 @@ class WorkerWebSocket(WebSocketClient):
 def main():
     parser = argparse.ArgumentParser(description='Worker for linstt-dispatch')
     parser.add_argument('-u', '--uri', default="ws://"+SERVER_IP+":"+SERVER_PORT+SERVER_TARGET, dest="uri", help="Server<-->worker websocket URI")
-    parser.add_argument('-f', '--fork', default=1, dest="fork", type=int)
 
     args = parser.parse_args()
     #thread.start_new_thread(loop.run, ())
     if not os.path.isdir(TEMP_FILE_PATH):
         os.mkdir(TEMP_FILE_PATH)
-
+    print('#'*50)
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)8s %(asctime)s %(message)s ")
-    logging.debug('Starting up worker')
-
+    logging.info('Starting up worker')
     ws = WorkerWebSocket(args.uri)
     try:
         ws.connect()
+        logging.info("Worker succefully connected to server at %s:%s" % (SERVER_IP, SERVER_PORT))
         ws.run_forever()
     except KeyboardInterrupt:
         ws.close()

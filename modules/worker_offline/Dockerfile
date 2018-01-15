@@ -40,7 +40,7 @@ RUN mkdir -p $BASE_DIR
 
 WORKDIR $BASE_DIR
 
-# Install Flask
+# Install tornado
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
@@ -49,4 +49,4 @@ COPY . .
 RUN ./deploy-offline-decoding.sh /opt/kaldi /opt/lium_spkdiarization-8.4.1.jar /opt/models
 
 # Set the default command
-CMD ./worker.py
+CMD ./worker_offline.py
