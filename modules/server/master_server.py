@@ -140,7 +140,7 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
     @gen.coroutine        
     def receive_response(self, message):
         logging.debug("Forwarding transcription to client")
-        self.add_header('result', message)
+        self.write({'transcript': message})
         self.set_status(200, "Transcription succeded")
         self.application.num_requests_processed += 1
         self.waitResponse.notify()
