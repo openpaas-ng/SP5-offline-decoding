@@ -18,11 +18,13 @@ This project runs on python 2.7.
 In order to run the [master_server] and the [client] you will need to install those python libraries: 
 - tornado>=4.5.2
 - ws4py
+
 ```
 pip install ws4py 
 pip install tornado
 ```
-Or  
+Or
+
 ```
 pip install -r recquirements.txt
 ```
@@ -73,6 +75,7 @@ The test should display "Test succefull"
 #### 1- Server
 * Configure the server options by editing the server.conf file.
 * Launch the server 
+
 ```
 ./master_server.py
 ``` 
@@ -81,6 +84,7 @@ The test should display "Test succefull"
 You can launch as many workers as you want on any machine that you want.
 * Configure the worker by editing the server.conf file, provide the server IP adress ans server port.
 * Launch the worker using the start_docker.sh command
+
 ```
 cd modules/worker_offline
 ./start_docker.sh <langageModelPath>
@@ -107,7 +111,7 @@ cd modules/worker_offline
 ## Authors
 
 * **Abdelwahab Aheba** - *linstt-Offline-Decoding* - [Linagora]()
-* **Rudy Baraglia** - *linstt-dispatch*-[Linagora] ()
+* **Rudy Baraglia** - *linstt-dispatch* - [Linagora] ()
 
 
 ## License
