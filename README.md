@@ -1,4 +1,4 @@
-# Project Title
+# linstt-offline-dispatch
 
 This project aims to build a speech-to-text transcriber web service based on kaldi-offline-decoding.
 
