@@ -110,8 +110,8 @@ cd modules/worker_offline
 
 ## Authors
 
-* **Abdelwahab Aheba** - *linstt-Offline-Decoding* - [Linagora]()
-* **Rudy Baraglia** - *linstt-dispatch* - [Linagora] ()
+* **Abdelwahab Aheba** - *linstt-Offline-Decoding* - [Linagora](https://linagora.com/)
+* **Rudy Baraglia** - *linstt-dispatch* - [Linagora] (https://linagora.com/)
 
 
 ## License
@@ -120,4 +120,4 @@ See the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
 
-* The project has been vastly inspired by Alumae's (https://github.com/alumae) projet kaldi-gstreamer-server (https://github.com/alumae/kaldi-gstreamer-server) and use chunk of his code.
+* The project has been vastly inspired by [Alumae](https://github.com/alumae)'s project [kaldi-gstreamer-server](https://github.com/alumae/kaldi-gstreamer-server) and use chunk of his code.
