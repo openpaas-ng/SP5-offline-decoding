@@ -120,4 +120,4 @@ See the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
 
-* The project has been vastly inspired by Alumae's (https://github.com/alumae) project kaldi-gstreamer-server (https://github.com/alumae/kaldi-gstreamer-server) and use chunk of his code.
+* The project has been vastly inspired by [Alumae](https://github.com/alumae)'s project [kaldi-gstreamer-server](https://github.com/alumae/kaldi-gstreamer-server) and use chunk of his code.
