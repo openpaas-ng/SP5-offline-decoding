@@ -169,7 +169,8 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
             logging.debug("Message received from worker:" + message)
         else:  
             if 'transcription' in json_msg.keys(): #Receive the file path to process
-                logging.debug("Response send by worker : %s" % json.dumps({'transcript':json_msg['transcription']}))
+                print(json_msg['transcription'])
+                logging.debug("Response send by worker : %s" % json.dumps({'transcript':json_msg['transcription'].encode('utf-8')}))
                 self.client_handler.receive_response(json.dumps({'transcript':json_msg['transcription']}))
                 self.client_handler = None
                 self.application.available_workers.add(self)
@@ -198,7 +199,9 @@ def main():
     app = Application()
     app.listen(int(SERVER_PORT))
     logging.info('Starting up server listening on port %s' % SERVER_PORT)
-    tornado.ioloop.IOLoop.instance().start()
-    
+    try:
+        tornado.ioloop.IOLoop.instance().start()
+    except KeyboardInterrupt:
+        logging.info("Server close by user.")
 if __name__ == '__main__':
     main()

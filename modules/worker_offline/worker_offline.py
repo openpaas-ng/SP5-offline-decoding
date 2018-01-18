@@ -13,6 +13,7 @@ import json
 import subprocess
 import configparser
 import re
+import tenacity
 
 from ws4py.client.threadedclient import WebSocketClient
 
@@ -26,6 +27,10 @@ DECODER_COMMAND = worker_settings.get('worker_params', 'decoder_command')
 TEMP_FILE_PATH = worker_settings.get('worker_params', 'temp_file_location')
 PREPROCESSING = True if worker_settings.get('worker_params', 'preprocessing') == 'true' else False
 
+class NoRouteException(Exception):
+    pass
+class ConnexionRefusedException(Exception):
+    pass
 
 class WorkerWebSocket(WebSocketClient):
     def __init__(self, uri):
@@ -89,7 +94,30 @@ class WorkerWebSocket(WebSocketClient):
     def finish_request(self):
         pass
     
-    
+@tenacity.retry(
+        wait=tenacity.wait.wait_fixed(2),
+        stop=tenacity.stop.stop_after_delay(45),
+        retry=tenacity.retry_if_exception(ConnexionRefusedException)
+    )
+def connect_to_server(ws):
+    try:
+        logging.info("Attempting to connect to server at %s:%s" % (SERVER_IP, SERVER_PORT))
+        ws.connect()
+        logging.info("Worker succefully connected to server at %s:%s" % (SERVER_IP, SERVER_PORT))
+        ws.run_forever()
+    except KeyboardInterrupt:
+        logging.info("Worker interrupted by user")
+        ws.close()
+    except Exception, e:
+        if "[Errno 113]" in str(e):
+            logging.info("Failed to connect")
+            raise NoRouteException
+        if "[Errno 111]" in str(e):
+            logging.info("Failed to connect")
+            raise ConnexionRefusedException
+        logging.debug(e)
+    logging.info("Worker stopped")
+
 def main():
     parser = argparse.ArgumentParser(description='Worker for linstt-dispatch')
     parser.add_argument('-u', '--uri', default="ws://"+SERVER_IP+":"+SERVER_PORT+SERVER_TARGET, dest="uri", help="Server<-->worker websocket URI")
@@ -103,12 +131,8 @@ def main():
     logging.info('Starting up worker')
     ws = WorkerWebSocket(args.uri)
     try:
-        ws.connect()
-        logging.info("Worker succefully connected to server at %s:%s" % (SERVER_IP, SERVER_PORT))
-        ws.run_forever()
-    except KeyboardInterrupt:
-        ws.close()
-    
-    
+        connect_to_server(ws)
+    except Exception:
+        logging.error("Worker did not manage to connect to server at %s:%s" % (SERVER_IP, SERVER_PORT))
 if __name__ == '__main__':
     main()
