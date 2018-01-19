@@ -1,3 +1,4 @@
 ws4py
 configparser
-tenacity 
+tenacity
+pydub

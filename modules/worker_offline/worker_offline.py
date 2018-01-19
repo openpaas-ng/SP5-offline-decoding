@@ -14,6 +14,7 @@ import subprocess
 import configparser
 import re
 import tenacity
+from signal_trimming import *
 
 from ws4py.client.threadedclient import WebSocketClient
 
@@ -50,13 +51,14 @@ class WorkerWebSocket(WebSocketClient):
                 self.client_uuid = json_msg['uuid']
                 self.fileName = self.client_uuid.replace('-', '')
                 self.file = json_msg['file'].decode('base64')
-
-                with open('./wavs/'+self.fileName+'.wav', 'wb') as f:
+                self.filepath = TEMP_FILE_PATH+self.fileName+'.wav'
+                with open(self.filepath, 'wb') as f:
                     f.write(self.file)
                 logging.debug("FileName received: %s" % self.fileName)
                 # TODO: preprocessing ? (sox python)
                 if PREPROCESSING:
-                    pass
+                    logging.debug("Trimming signal")
+                    trim_silence_segments(self.filepath,self.filepath, chunk_size=100, threshold_factor=0.85, side_effect_accomodation=0)
                 # Offline decoder call
                 
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')

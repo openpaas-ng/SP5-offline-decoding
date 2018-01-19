@@ -31,7 +31,7 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 #        java -Xmx2024m -jar $lvcsrRootDir/tools/lium_spkdiarization-8.4.1.jar  \
 #            --fInputMask=$file --sOutputMask=$datadir/$fileRootName.seg --doCEClustering $fileRootName
 	duration=`soxi -D $file`
-	echo "$fileRootName 1 0 $duration M S U S0" | sort -nk3 > $datadir/$fileRootName.seg
+#	echo "$fileRootName 1 0 $duration M S U S0" | sort -nk3 > $datadir/$fileRootName.seg
     fi
     if [ $stage -le 2 ]; then
         # Generate kaldi input for offline decoding
@@ -50,7 +50,7 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 		    echo "$tag sox $file -t wav -r 16000 -c 1 - |"
 		done) > $datadir/wav.scp
 		cat $datadir/wav.scp | awk '{ print $1, $1, "A"; }' > $datadir/reco2file_and_channel
-		echo validate_data_dir.sh
+#		echo validate_data_dir.sh
 		$lvcsrRootDir/scripts/utils/validate_data_dir.sh --no-text --no-feats $datadir
 		$lvcsrRootDir/scripts/utils/fix_data_dir.sh $datadir
 	fi
@@ -67,7 +67,7 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 
 	if [ $stage -le 4 ]; then
         if [ ! -f $transdir/trans.1 ]; then
-            echo "run fmllr decoding"
+ #           echo "run fmllr decoding"
             $lvcsrRootDir/scripts/steps/decode.sh --nj $decode_nj --cmd "$decode_cmd" --num-threads $num_threads --skip-scoring "true" \
             $gmmdir/Graph $datadir $transdir || exit 1
         fi
@@ -80,5 +80,5 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 	### Rescoring with LM
 	### Get CTM and STM files
 
-echo "End...."
+#echo "End...."
 

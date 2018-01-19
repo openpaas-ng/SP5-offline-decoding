@@ -45,6 +45,7 @@ class Application(tornado.web.Application):
             (r"/worker/ws/speech", WorkerWebSocketHandler)
         ]
         tornado.web.Application.__init__(self, handlers, **settings)
+        self.connected_worker = 0
         self.available_workers = set()
         self.waiting_client = set()
         self.num_requests_processed = 0
@@ -61,7 +62,7 @@ class Application(tornado.web.Application):
 
     def display_server_status(self):
         logging.info('#'*50)
-        logging.info("Available workers: %s" % str(len(self.available_workers)))
+        logging.info("Connected workers: %s (Available: %s)" % (str(self.connected_worker),str(len(self.available_workers))))
         logging.info("Waiting clients: %s" % str(len(self.waiting_client)))
         logging.info("Requests processed: %s" % str(self.num_requests_processed))
             
@@ -158,6 +159,7 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.client_handler = None 
         self.application.available_workers.add(self)
+        self.application.connected_worker += 1
         self.application.check_waiting_clients()
         logging.debug("Worker connected")
         self.application.display_server_status()
@@ -169,7 +171,6 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
             logging.debug("Message received from worker:" + message)
         else:  
             if 'transcription' in json_msg.keys(): #Receive the file path to process
-                print(json_msg['transcription'])
                 logging.debug("Response send by worker : %s" % json.dumps({'transcript':json_msg['transcription'].encode('utf-8')}))
                 self.client_handler.receive_response(json.dumps({'transcript':json_msg['transcription']}))
                 self.client_handler = None
@@ -187,6 +188,7 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.client_handler.send_error("Worker closed")
         logging.debug("WORKER WebSocket closed")
         self.application.available_workers.discard(self)
+        self.application.connected_worker -= 1
         self.application.display_server_status()
 
 def main():
