@@ -72,7 +72,7 @@ class WorkerWebSocket(WebSocketClient):
                         self.send_result(result)
                 else:
                     logging.error("Worker Failed to create transcription file")
-                    self.send_error("File was not created by worker")
+                    self.send_result("")
                 
                 # Delete temporary files
                 for file in os.listdir(TEMP_FILE_PATH):
@@ -81,7 +81,7 @@ class WorkerWebSocket(WebSocketClient):
     def post(self, m):
         logging.debug('POST received')
 
-    def send_result(self, result=None):
+    def send_result(self, result=""):
         msg = json.dumps({u'uuid': self.client_uuid, u'transcription':result, u'trust_ind':u"0.1235"})
         self.client_uuid = None
         self.send(msg)

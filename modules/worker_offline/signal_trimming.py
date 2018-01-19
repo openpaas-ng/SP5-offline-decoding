@@ -5,7 +5,7 @@ Created on Thu Jan 18 17:32:23 2018
 
 @author: rbaraglia
 """
-
+import sys
 from pydub import AudioSegment
 
 
@@ -59,3 +59,5 @@ def trim_silence_segments(input_file,output_file, chunk_size=100, threshold_fact
     trimmed_sound.export(output_file, format="wav")
     
 
+if __name__ == '__main__':
+    trim_silence_segments(sys.argv[1], sys.argv[2])

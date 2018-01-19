@@ -185,7 +185,8 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
         
     def on_close(self):
         if self.client_handler != None:
-            self.client_handler.send_error("Worker closed")
+            self.client_handler.set_status(503, "Worker failed to translate file")
+            self.client_handler.finish()
         logging.debug("WORKER WebSocket closed")
         self.application.available_workers.discard(self)
         self.application.connected_worker -= 1
