@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan  4 11:10:18 2018
@@ -24,9 +24,7 @@ def main():
     with open(args.audioFile, 'rb') as f: 
         print("Sendind request to transcribe file %s to server at %s" % (args.audioFile, "http://"+SERVER_IP+":"+SERVER_PORT+SERVER_TARGET))
         r = requests.post(args.uri, files={'wavFile': f})
-        print(type(r))
-        print(r.headers)
-        print(r.status_code)
+        print(r.json()['transcript']
         
 if __name__ == '__main__':
     main()

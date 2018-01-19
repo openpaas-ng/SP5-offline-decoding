@@ -171,7 +171,8 @@ class WorkerWebSocketHandler(tornado.websocket.WebSocketHandler):
             logging.debug("Message received from worker:" + message)
         else:  
             if 'transcription' in json_msg.keys(): #Receive the file path to process
-                logging.debug("Response send by worker : %s" % json.dumps({'transcript':json_msg['transcription'].encode('utf-8')}))
+                response = json.dumps({'transcript':json_msg['transcription'].encode('utf-8')})
+                logging.debug("Response send by worker : %s" % response)
                 self.client_handler.receive_response(json.dumps({'transcript':json_msg['transcription']}))
                 self.client_handler = None
                 self.application.available_workers.add(self)
