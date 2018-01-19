@@ -7,6 +7,7 @@ Created on Thu Jan 18 17:32:23 2018
 """
 import sys
 import os
+import glob
 from pydub import AudioSegment
 
 
@@ -35,7 +36,7 @@ def average_power_level(sound, chunk_size=100):
         if (sound[trim_ms:trim_ms+chunk_size].dBFS != -float('Inf')):
             avg_power += sound[trim_ms:trim_ms+chunk_size].dBFS
             nb_chunk += 1
-    avg_power = avg_power/nb_chunk
+    avg_power = avg_power/(nb_chunk if nb_chunk >0 else 1)
     return avg_power
 
     '''
@@ -47,9 +48,9 @@ def average_power_level(sound, chunk_size=100):
     threshold_factor ]0,1]
     side_effect_accomodation is a number of chunk that will be kept at the beginning and end despite being below the threshold
     return the silence segment
-    
+    TODO:Calculate standard deviation, put a threshold on it to acknolegde if the trimming is truly needed (for file without silence for exemple)
     '''
-def trim_silence_segments(input_file,output_file, chunk_size=100, threshold_factor=0.85, side_effect_accomodation=0):
+def trim_silence_segments(input_file,output_file, chunk_size=100, threshold_factor=0.85, side_effect_accomodation=1):
     #sound = AudioSegment.from_file("/home/rbaraglia/data/SG/audio-18_01_18/rec---2018-01-18_081957.wav", format="wav")
     sound = AudioSegment.from_file(input_file, format="wav")
     avg_power = average_power_level(sound)
@@ -67,3 +68,12 @@ if __name__ == '__main__':
     if len(sys.argv) == 4:
         silence1.export(sys.argv[3] + os.path.basename(sys.argv[1]).split('.')[0] + "beg_sil.wav", format="wav")
         silence2.export(sys.argv[3] + os.path.basename(sys.argv[1]).split('.')[0] + "end_sil.wav", format="wav")
+
+
+    '''
+    # This part is for testing purpose and process recursivly all the wavfile in a directory in order to retrieve silences
+    for filename in glob.iglob("/home/rbaraglia/data/SG/**/rec*.wav", recursive=True):
+        [silence1, silence2] = trim_silence_segments(filename, "/tmp/tmp.wav")
+        silence1.export("/home/rbaraglia/data/silences/" + os.path.basename(filename).split('.')[0] + "_beg_sil.wav", format="wav")
+        silence2.export("/home/rbaraglia/data/silences/" + os.path.basename(filename).split('.')[0] + "_end_sil.wav", format="wav")
+    '''
