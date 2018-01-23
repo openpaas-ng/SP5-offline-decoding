@@ -27,6 +27,8 @@ TEMP_FILE_PATH = server_settings.get('machine_params', 'temp_file_location')
 KEEP_TEMP_FILE = True if server_settings.get('server_params', 'keep_temp_files') == 'true' else False
 LOGGING_LEVEL = logging.DEBUG if server_settings.get('server_params', 'debug') == 'true' else logging.INFO
 
+if "OFFLINE_PORT" in os.environ:
+    SERVER_PORT = os.environ['OFFLINE_PORT']
 
 class Application(tornado.web.Application):
     def __init__(self):

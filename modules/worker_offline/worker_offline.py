@@ -28,6 +28,9 @@ DECODER_COMMAND = worker_settings.get('worker_params', 'decoder_command')
 TEMP_FILE_PATH = worker_settings.get('worker_params', 'temp_file_location')
 PREPROCESSING = True if worker_settings.get('worker_params', 'preprocessing') == 'true' else False
 
+if "OFFLINE_PORT" in os.environ:
+    SERVER_PORT = os.environ['OFFLINE_PORT']
+
 class NoRouteException(Exception):
     pass
 class ConnexionRefusedException(Exception):
