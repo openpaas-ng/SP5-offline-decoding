@@ -80,5 +80,5 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
 	### Rescoring with LM
 	### Get CTM and STM files
 
-echo "End...."
+#echo "End...."
 
