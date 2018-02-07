@@ -70,6 +70,12 @@ sysRootName=$(echo $(basename $sysdir)|cut -f1 -d"=")
             echo "run fmllr decoding"
             $lvcsrRootDir/scripts/steps/decode.sh --nj $decode_nj --cmd "$decode_cmd" --num-threads $num_threads --skip-scoring "true" \
             $gmmdir/Graph $datadir $transdir || exit 1
+
+			gunzip -c $transdir/lat.1.gz |\
+			lattice-to-nbest --acoustic-scale=0.0883 --n=10 --lm-scale=1.0 ark:- ark:- | \
+			nbest-to-ctm --precision=1 ark:- - | utils/int2sym.pl -f 5 $gmmdir/Graph/words.txt > $transdir/indice_confiance_brut.txt
+
+			$lvcsrRootDir/scripts/./extractorData.sh $transdir/indice_confiance_brut.txt > $transdir/indice_confiance.txt
         fi
 	mv $transdir $lvcsrRootDir/trans
 	cat $lvcsrRootDir/trans/decode_$fileRootName/log/decode.1.log | grep -v "#" | grep -v "LOG" | grep -v "gmm-latgen-faster" | grep -v "splice-feats" | grep -v "transform-feats" | grep -v "apply-cmvn" | awk '{$1=""; print $0}' | sed 's/^[ ]//' > $lvcsrRootDir/trans/decode_$fileRootName.log

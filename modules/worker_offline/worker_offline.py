@@ -69,7 +69,7 @@ class WorkerWebSocket(WebSocketClient):
                 
                 # Check result
                 if os.path.isfile('trans/decode_'+self.fileName+'.log'):
-                    with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
+                    with open('trans/decode_'+self.fileName+'/indice_confiance.txt', 'r') as resultFile:
                         result = resultFile.read().strip()
                         logging.debug("Transcription is: %s" % result)
                         self.send_result(result)

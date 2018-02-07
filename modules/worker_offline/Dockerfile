@@ -43,6 +43,7 @@ WORKDIR $BASE_DIR
 # Install tornado
 COPY requirements.txt .
 RUN pip2 install -r requirements.txt
+RUN apt-get install bc
 
 # Deploy our offline server
 COPY . .
