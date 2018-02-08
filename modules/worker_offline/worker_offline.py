@@ -27,6 +27,8 @@ SERVER_TARGET = worker_settings.get('server_params', 'server_target')
 DECODER_COMMAND = worker_settings.get('worker_params', 'decoder_command')
 TEMP_FILE_PATH = worker_settings.get('worker_params', 'temp_file_location')
 PREPROCESSING = True if worker_settings.get('worker_params', 'preprocessing') == 'true' else False
+INDICE_DATA = True if worker_settings.get('worker_params', 'indice_data') == 'true' else False
+
 
 if "OFFLINE_PORT" in os.environ:
     SERVER_PORT = os.environ['OFFLINE_PORT']
@@ -65,14 +67,20 @@ class WorkerWebSocket(WebSocketClient):
                 # Offline decoder call
                 
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
-                subprocess.call("cd scripts; ./decode.sh ../systems/models "+self.fileName+".wav", shell=True)
+                subprocess.call("cd scripts; ./decode.sh ../systems/models "+self.fileName+".wav "+str(INDICE_DATA), shell=True)
                 
                 # Check result
                 if os.path.isfile('trans/decode_'+self.fileName+'.log'):
-                    with open('trans/decode_'+self.fileName+'/indice_confiance.txt', 'r') as resultFile:
-                        result = resultFile.read().strip()
-                        logging.debug("Transcription is: %s" % result)
-                        self.send_result(result)
+                    if INDICE_DATA and os.path.isfile('trans/decode_'+self.fileName+'/indice_confiance.txt'):
+                        with open('trans/decode_'+self.fileName+'/indice_confiance.txt', 'r') as resultFile:
+                            result = resultFile.read().strip()
+                            logging.debug("Transcription is: %s" % result)
+                            self.send_result(result)
+                    else:
+                        with open('trans/decode_'+self.fileName+'.log', 'r') as resultFile:
+                            result = resultFile.read().strip()
+                            logging.debug("Transcription is: %s" % result)
+                            self.send_result(result)
                 else:
                     logging.error("Worker Failed to create transcription file")
                     self.send_result("")
