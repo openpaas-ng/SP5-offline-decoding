@@ -27,6 +27,7 @@ do
 	name="$line"
 	arrLine=($line)
 	currentId="${arrLine[$posName]##*-}"
+
 	if [ "$currentId" -eq "$previousId" ]; then
 		#Manage all data value before storage
 		countUtterance=$((countUtterance + 1))
@@ -35,9 +36,9 @@ do
 		languageScore[$currentId]=`echo ${languageScore[currentId]} + ${arrLine[$posLanguage]} | bc`	
 	else
 		#Do stuff on the previous segment before swap
-		acousticScore[$previousId]=$(echo "scale=2; ${acousticScore[$previousId]}/$countUtterance" | bc)
-		languageScore[$previousId]=$(echo "scale=2; ${languageScore[$previousId]}/$countUtterance" | bc)
-		
+		acousticScore[$previousId]="$(echo "scale=2; ${acousticScore[$previousId]}/$countUtterance" | bc | sed -e 's/^0*//' -e 's/^\./0./')"
+		languageScore[$previousId]="$(echo "scale=2; ${languageScore[$previousId]}/$countUtterance" | bc | sed -e 's/^0*//' -e 's/^\./0./')"
+
 		#Init for the next seglment
 		previousId=$currentId
 		countUtterance=0
@@ -47,31 +48,25 @@ do
 
 		#Init data for the uterance
 		countUtterance=$((countUtterance + 1))
-		utteranceValue[$currentId]="${utteranceValue[currentId]} ${arrLine[$posUtterance]}"
+		utteranceValue[$currentId]="${utteranceValue[currentId]}${arrLine[$posUtterance]}"
 		acousticScore[$currentId]=`echo ${acousticScore[currentId]} + ${arrLine[$posAcoustic]} | bc`
 		languageScore[$currentId]=`echo ${languageScore[currentId]} + ${arrLine[$posLanguage]} | bc`	
 
 	fi
 done < "$dataFile"
 
-#Need to manage the last data
-acousticScore[$previousId]=$(echo "scale=2; ${acousticScore[$previousId]}/$countUtterance" | bc)
-languageScore[$previousId]=$(echo "scale=2; ${languageScore[$previousId]}/$countUtterance" | bc)
+-#Need to manage the last data
+acousticScore[$previousId]="$(echo "scale=2; ${acousticScore[$previousId]}/$countUtterance" | bc | sed -e 's/^0*//' -e 's/^\./0./')"
+languageScore[$previousId]="$(echo "scale=2; ${languageScore[$previousId]}/$countUtterance" | bc | sed -e 's/^0*//' -e 's/^\./0./')"
+
 
 #start to 1, no id 0 stored
-echo "["
+echo -n "{\"hypotheses\":["
 for i in `seq 1 $previousId`; do
-		acousticScore[$i]=$(echo "scale=2; 1-${acousticScore[$i]}" | bc)
-		languageScore[$i]=$(echo "scale=2; 1-${languageScore[$i]}" | bc)
-
-		echo "{"
-		echo "\"utterance\":\"${utteranceValue[$i]}\","
-		echo "\"acousticScore\":0${acousticScore[$i]},"
-		echo "\"languageScore\":0${languageScore[$i]}"
 		if [ "$i" -eq "$previousId" ]; then
-			echo "}"
+			echo -n "{\"utterance\":\"${utteranceValue[$i]}\",\"acousticScore\":${acousticScore[$i]},\"languageScore\":${languageScore[$i]}}"
 		else
-			echo "},"
+			echo -n "{\"utterance\":\"${utteranceValue[$i]}\",\"acousticScore\":${acousticScore[$i]},\"languageScore\":${languageScore[$i]}},"
 		fi
 done
-echo "]"
+echo -n "]}"
