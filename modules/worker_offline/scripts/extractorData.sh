@@ -55,7 +55,7 @@ do
 	fi
 done < "$dataFile"
 
--#Need to manage the last data
+#Need to manage the last data
 acousticScore[$previousId]="$(echo "scale=2; ${acousticScore[$previousId]}/$countUtterance" | bc | sed -e 's/^0*//' -e 's/^\./0./')"
 languageScore[$previousId]="$(echo "scale=2; ${languageScore[$previousId]}/$countUtterance" | bc | sed -e 's/^0*//' -e 's/^\./0./')"
 
@@ -63,6 +63,14 @@ languageScore[$previousId]="$(echo "scale=2; ${languageScore[$previousId]}/$coun
 #start to 1, no id 0 stored
 echo -n "{\"hypotheses\":["
 for i in `seq 1 $previousId`; do
+		if [ -z "${acousticScore[$i]}" ]; then
+				acousticScore[$i]=0.0
+		fi
+
+		if [ -z "${languageScore[$i]}" ]; then
+				languageScore[$i]=0.0
+		fi
+
 		if [ "$i" -eq "$previousId" ]; then
 			echo -n "{\"utterance\":\"${utteranceValue[$i]}\",\"acousticScore\":${acousticScore[$i]},\"languageScore\":${languageScore[$i]}}"
 		else
