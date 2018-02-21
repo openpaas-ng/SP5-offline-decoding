@@ -28,10 +28,13 @@ DECODER_COMMAND = worker_settings.get('worker_params', 'decoder_command')
 TEMP_FILE_PATH = worker_settings.get('worker_params', 'temp_file_location')
 PREPROCESSING = True if worker_settings.get('worker_params', 'preprocessing') == 'true' else False
 INDICE_DATA = True if worker_settings.get('worker_params', 'indice_data') == 'true' else False
-
+MODEL_TYPE = "UC1"
 
 if "OFFLINE_PORT" in os.environ:
     SERVER_PORT = os.environ['OFFLINE_PORT']
+
+if "MODEL_TYPE" in os.environ:
+    MODEL_TYPE = os.environ['MODEL_TYPE']
 
 class NoRouteException(Exception):
     pass
@@ -134,12 +137,14 @@ def connect_to_server(ws):
 def main():
     parser = argparse.ArgumentParser(description='Worker for linstt-dispatch')
     parser.add_argument('-u', '--uri', default="ws://"+SERVER_IP+":"+SERVER_PORT+SERVER_TARGET, dest="uri", help="Server<-->worker websocket URI")
+    parser.add_argument('-m', '--model', default=MODEL_TYPE, type=str ,help="Identifiant of the model")
 
     args = parser.parse_args()
     #thread.start_new_thread(loop.run, ())
     if not os.path.isdir(TEMP_FILE_PATH):
         os.mkdir(TEMP_FILE_PATH)
     print('#'*50)
+
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)8s %(asctime)s %(message)s ")
     logging.info('Starting up worker')
     ws = WorkerWebSocket(args.uri)
