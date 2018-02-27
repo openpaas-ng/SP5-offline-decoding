@@ -63,7 +63,7 @@ class WorkerWebSocket(WebSocketClient):
                 # TODO: preprocessing ? (sox python)
                 if PREPROCESSING:
                     logging.debug("Trimming signal")
-                    trim_silence_segments(self.filepath,self.filepath, chunk_size=100, threshold_factor=0.85, side_effect_accomodation=0)
+                    trim_silence_segments(self.filepath,self.filepath, chunk_size=120, threshold_factor=0.85, side_effect_accomodation=2)
                 # Offline decoder call
                 
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
