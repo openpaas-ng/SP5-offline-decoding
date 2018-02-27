@@ -137,7 +137,7 @@ def connect_to_server(ws):
 def main():
     parser = argparse.ArgumentParser(description='Worker for linstt-dispatch')
     parser.add_argument('-u', '--uri', default="ws://"+SERVER_IP+":"+SERVER_PORT+SERVER_TARGET, dest="uri", help="Server<-->worker websocket URI")
-    parser.add_argument('-m', '--model', default=MODEL_TYPE, type=str ,help="Identifiant of the model")
+    parser.add_argument('-m', '--model', default=MODEL_TYPE, type=str ,help="Identifiant of the current model")
 
     args = parser.parse_args()
     #thread.start_new_thread(loop.run, ())
