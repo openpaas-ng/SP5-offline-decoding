@@ -126,7 +126,7 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
         logging.info(self.designation)
 
         yield self.allocate_worker()
-        self.worker.write_message(json.dumps({'uuid':self.uuid, 'file': self.temp_file.encode('base64')}))
+        self.worker.write_message(json.dumps({'uuid':self.uuid, 'designation': self.designation,'file': self.temp_file.encode('base64')}))
         yield self.waitResponse.wait()
         self.finish()
     
@@ -154,7 +154,6 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
         self.set_status(200, "Transcription succeded")
         self.application.num_requests_processed += 1
         self.waitResponse.notify()
-        
 
     def on_finish(self):
         #CLEANUP
