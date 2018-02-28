@@ -29,19 +29,20 @@ indiceData=$3
         fi
     fi
     if [ $stage -le 1 ]; then
-#        echo "doing Speaker diaritization : segment extraction"
-#        java -Xmx2024m -jar $lvcsrRootDir/tools/lium_spkdiarization-8.4.1.jar  \
-#            --fInputMask=$file --sOutputMask=$datadir/$fileRootName.seg --doCEClustering $fileRootName
-	duration=`soxi -D $file`
-	echo "$fileRootName 1 0 $duration M S U S0" | sort -nk3 > $datadir/$fileRootName.seg
+        echo "doing Speaker diaritization : segment extraction"
+        java -Xmx2024m -jar $lvcsrRootDir/tools/lium_spkdiarization-8.4.1.jar  \
+            --fInputMask=$file --sOutputMask=$datadir/$fileRootName.seg --doCEClustering $fileRootName
+#	duration=`soxi -D $file`
+#	echo "$fileRootName 1 0 $duration M S U S0" | sort -nk3 > $datadir/$fileRootName.seg
     fi
     if [ $stage -le 2 ]; then
         # Generate kaldi input for offline decoding
         # file gen: segments, utt2spk, spk2utt, wav.scp
         # Gen segments file
-	#awk '$1 !~ /^;;/ {print $1"-"$8"-"$3/100.0"-"($3+$4)/100.0" "$1" "$3/100.0" "($3+$4)/100.0}'
-        awk '$1 !~ /^;;/ {print $1"-"$8"-"$3"-"($3+$4)" "$1" "$3" "($3+$4)}' \
-		   	$datadir/$fileRootName.seg | sort -nk3 > $datadir/segments
+	awk '$1 !~ /^;;/ {print $1"-"$8"-"$3/100.0"-"($3+$4)/100.0" "$1" "$3/100.0" "($3+$4)/100.0}' \
+  	$datadir/$fileRootName.seg | sort -nk3 > $datadir/segments
+	echo "========================================================WIZZZZZ"
+	ls $datadir
         # Gen utt2spk file
         awk '{split($1,a,"-"); print $1" "a[2]  }'  $datadir/segments > $datadir/utt2spk
 		echo here before utt2spk_to_spk2utt.pl
