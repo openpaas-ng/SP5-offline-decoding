@@ -89,6 +89,12 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
         self.set_status(200, "Initial statut")
         self.waitResponse = Condition()
         self.waitWorker = Condition()
+
+        if not self.get_arguments('model'):
+            self.designation = 'uc1'
+        else:
+            self.designation = self.get_argument('model')
+
         if self.request.method != 'POST' :
             logging.debug("Received a non-POST request")
             self.set_status(403, "Wrong request, server handles only POST requests")
@@ -101,7 +107,7 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
             logging.debug("POST request from %s does not contain 'file_to_transcript' field.")
         temp_file = self.request.files['wavFile'][0]['body']
         self.temp_file = temp_file
-        
+
         #Writing file
         try:
             f = open(TEMP_FILE_PATH+self.uuid+'.wav', 'wb')
@@ -117,8 +123,10 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
     @gen.coroutine    
     def post(self, *args, **kwargs):
         logging.debug("Allocating Worker to %s" % self.uuid)
+        logging.info(self.designation)
+
         yield self.allocate_worker()
-        self.worker.write_message(json.dumps({'uuid':self.uuid, 'file': self.temp_file.encode('base64')}))
+        self.worker.write_message(json.dumps({'uuid':self.uuid, 'designation': self.designation,'file': self.temp_file.encode('base64')}))
         yield self.waitResponse.wait()
         self.finish()
     
@@ -146,7 +154,6 @@ class DecodeRequestHandler(tornado.web.RequestHandler):
         self.set_status(200, "Transcription succeded")
         self.application.num_requests_processed += 1
         self.waitResponse.notify()
-        
 
     def on_finish(self):
         #CLEANUP
