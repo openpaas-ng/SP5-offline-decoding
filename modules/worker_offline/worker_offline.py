@@ -29,7 +29,6 @@ TEMP_FILE_PATH = worker_settings.get('worker_params', 'temp_file_location')
 PREPROCESSING = True if worker_settings.get('worker_params', 'preprocessing') == 'true' else False
 INDICE_DATA = True if worker_settings.get('worker_params', 'indice_data') == 'true' else False
 
-
 if "OFFLINE_PORT" in os.environ:
     SERVER_PORT = os.environ['OFFLINE_PORT']
 
@@ -54,6 +53,7 @@ class WorkerWebSocket(WebSocketClient):
         else: 
             if 'uuid' in json_msg.keys():
                 self.client_uuid = json_msg['uuid']
+                self.designation = json_msg['designation']
                 self.fileName = self.client_uuid.replace('-', '')
                 self.file = json_msg['file'].decode('base64')
                 self.filepath = TEMP_FILE_PATH+self.fileName+'.wav'
@@ -67,7 +67,7 @@ class WorkerWebSocket(WebSocketClient):
                 # Offline decoder call
                 
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
-                subprocess.call("cd scripts; ./decode.sh ../systems/models "+self.fileName+".wav "+str(INDICE_DATA), shell=True)
+                subprocess.call("cd scripts; ./decode.sh ../systems/models/"+self.designation+"/model/ "+self.fileName+".wav "+str(INDICE_DATA), shell=True)
                 
                 # Check result
                 if os.path.isfile('trans/decode_'+self.fileName+'.log'):
@@ -139,7 +139,7 @@ def main():
     #thread.start_new_thread(loop.run, ())
     if not os.path.isdir(TEMP_FILE_PATH):
         os.mkdir(TEMP_FILE_PATH)
-    print('#'*50)
+
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)8s %(asctime)s %(message)s ")
     logging.info('Starting up worker')
     ws = WorkerWebSocket(args.uri)
