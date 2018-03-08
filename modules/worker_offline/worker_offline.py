@@ -60,7 +60,6 @@ class WorkerWebSocket(WebSocketClient):
                     logging.debug("Trimming signal")
                     trim_silence_segments(self.filepath,self.filepath, chunk_size=100, threshold_factor=0.85, side_effect_accomodation=0)
                 # Offline decoder call
-                
                 logging.debug(DECODER_COMMAND + ' ' + TEMP_FILE_PATH + self.fileName+'.wav')
                 subprocess.call("cd scripts; ./decode.sh ../systems/models "+self.fileName+".wav", shell=True)
                 
